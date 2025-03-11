@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/PLYLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+    <h1>3D Model Viewer</h1>
+    <div id="container" style="width: 800px; height: 600px;"></div>
+
+    <script>
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera(75, 800 / 600, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(800, 600);
+        document.getElementById("container").appendChild(renderer.domElement);
+
+        // OrbitControls for rotation, zoom, and pan
+        let controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Smooth movement
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = false;
+        controls.minDistance = 1;
+        controls.maxDistance = 10;
+
+        // Add lighting
+        let ambientLight = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambientLight);
+
+        let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(1, 1, 1).normalize();
+        scene.add(directionalLight);
+
+        // Load PLY model
+        let loader = new THREE.PLYLoader();
+        loader.load("/static/models/sample.ply", function (geometry) {
+            geometry.computeVertexNormals();  // Compute normals
+            let material = new THREE.MeshStandardMaterial({ color: 0x0055ff, flatShading: false });
+            let mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(0, 0, 0);
+            mesh.scale.multiplyScalar(0.5); 
+            scene.add(mesh);
+        });
+
+        // Set camera position
+        camera.position.set(2, 2, 5);
+        camera.lookAt(scene.position);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Update OrbitControls
+            renderer.render(scene, camera);
+        }
+        animate();
+
+    </script>
+</body>
+
+</html>
